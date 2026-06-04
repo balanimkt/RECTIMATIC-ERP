@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RECTIMATIC ERP — Sistema de Gestión</title>
+<title>RECTIMATIC ERP — Sistema de Gestión v3</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <style>
@@ -766,7 +766,7 @@ body{
           <i class="bi bi-key"></i>
           <input id="loginPass" type="password" placeholder="Contraseña" autocomplete="current-password" required>
         </div>
-        <button class="login-btn" type="submit"><i class="bi bi-box-arrow-in-right me-1"></i> Ingresar al sistema</button>
+        <button id="loginSubmitBtn" class="login-btn" type="submit"><i class="bi bi-box-arrow-in-right me-1"></i> Ingresar al sistema</button>
         <div id="loginError" class="login-error"><i class="bi bi-exclamation-triangle me-1"></i> Usuario o contraseña incorrectos.</div>
       </form>
 
@@ -1563,19 +1563,27 @@ setTimeout(buildExtraMobileCardsV2,50);
 
 
 
-/* ===== LOGIN VISUAL TEMPORAL - SIN APPS SCRIPT ===== */
+/* ===== LOGIN VISUAL TEMPORAL - SIN APPS SCRIPT =====
+   Esta parte se reemplazará después por Apps Script + Google Sheets.
+*/
 const demoUsers = [
-  { usuario:'admin', claves:['Admin1234','admin1234'], nombre:'Administrador', rol:'administrador' },
-  { usuario:'operador', claves:['Operador1234','operador1234'], nombre:'Operador', rol:'operador' },
-  { usuario:'caja', claves:['Caja1234','caja1234'], nombre:'Caja', rol:'caja' }
+  { usuario:'admin', clave:'Admin1234', nombre:'Administrador', rol:'administrador' },
+  { usuario:'operador', clave:'Operador1234', nombre:'Operador', rol:'operador' },
+  { usuario:'caja', clave:'Caja1234', nombre:'Caja', rol:'caja' }
 ];
+
+function normalizarTexto(valor){
+  return String(valor || '').trim();
+}
 
 function showERP(user){
   const loginScreen = document.getElementById('loginScreen');
   const erpApp = document.getElementById('erpApp');
   const userPill = document.getElementById('currentUserPill');
-  if(loginScreen) loginScreen.style.display='none';
-  if(erpApp) erpApp.classList.add('is-authenticated');
+
+  if(loginScreen) loginScreen.style.display = 'none';
+  if(erpApp) erpApp.style.display = 'block';
+
   if(userPill && user){
     userPill.innerHTML = `<i class="bi bi-person-circle"></i> ${user.nombre}`;
   }
@@ -1586,6 +1594,33 @@ function logoutDemo(){
   location.reload();
 }
 
+function validarLoginDemo(){
+  const usuarioInput = document.getElementById('loginUser');
+  const claveInput = document.getElementById('loginPass');
+  const error = document.getElementById('loginError');
+
+  const usuario = normalizarTexto(usuarioInput?.value).toLowerCase();
+  const clave = normalizarTexto(claveInput?.value);
+
+  if(error) error.style.display = 'none';
+
+  const user = demoUsers.find(u =>
+    u.usuario.toLowerCase() === usuario && u.clave === clave
+  );
+
+  if(user){
+    sessionStorage.setItem('rectimatic_user', JSON.stringify(user));
+    showERP(user);
+    return true;
+  }
+
+  if(error){
+    error.style.display = 'block';
+    error.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i> Usuario o contraseña incorrectos. Revisa mayúsculas y minúsculas.';
+  }
+  return false;
+}
+
 function initLoginDemo(){
   const saved = sessionStorage.getItem('rectimatic_user');
   if(saved){
@@ -1593,24 +1628,23 @@ function initLoginDemo(){
   }
 
   const form = document.getElementById('loginForm');
-  if(!form) return;
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    const usuario = document.getElementById('loginUser').value.trim().toLowerCase();
-    const clave = document.getElementById('loginPass').value.trim();
-    const error = document.getElementById('loginError');
-    const user = demoUsers.find(u => u.usuario === usuario && u.claves.includes(clave));
+  if(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      validarLoginDemo();
+    });
+  }
 
-    if(user){
-      sessionStorage.setItem('rectimatic_user', JSON.stringify(user));
-      showERP(user);
-    }else{
-      if(error) error.style.display='block';
-    }
-  });
+  const btn = document.getElementById('loginSubmitBtn');
+  if(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      validarLoginDemo();
+    });
+  }
 }
 
-initLoginDemo();
+document.addEventListener('DOMContentLoaded', initLoginDemo);
 
 </script>
 </body>
