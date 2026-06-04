@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>RECTIMATIC ERP — Sistema de Gestión v3</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -723,6 +723,46 @@ body{
   .login-brand h1{font-size:19px}
   .login-copy h2{font-size:27px}
   .login-stats{grid-template-columns:1fr}
+}
+
+/* ===== CORRECCIÓN ZOOM MÓVIL EN CAMPOS DE TEXTO ===== */
+@media (max-width:900px){
+  input,
+  select,
+  textarea,
+  .form-control,
+  .form-select,
+  .login-field input{
+    font-size:16px !important;
+  }
+}
+
+
+/* ===== FIX DEFINITIVO IPHONE: evita zoom al escribir y lo resetea al entrar ===== */
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+@media(max-width:900px){
+  input, select, textarea, button{
+    font-size:16px !important;
+  }
+  .login-field input,
+  .form-control,
+  .form-select{
+    font-size:16px !important;
+  }
+  .login-screen{
+    width:100%;
+    max-width:100vw;
+    overflow-x:hidden;
+  }
+  .erp-app{
+    width:100%;
+    max-width:100vw;
+    overflow-x:hidden;
+  }
 }
 
 </style>
@@ -1576,13 +1616,31 @@ function normalizarTexto(valor){
   return String(valor || '').trim();
 }
 
+function resetMobileZoom(){
+  try{
+    if(document.activeElement && typeof document.activeElement.blur === 'function'){
+      document.activeElement.blur();
+    }
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if(viewport){
+      viewport.setAttribute('content','width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
+    }
+    window.scrollTo(0,0);
+    setTimeout(()=>window.scrollTo(0,0),80);
+    setTimeout(()=>window.scrollTo(0,0),250);
+  }catch(e){}
+}
+
 function showERP(user){
+  resetMobileZoom();
   const loginScreen = document.getElementById('loginScreen');
   const erpApp = document.getElementById('erpApp');
   const userPill = document.getElementById('currentUserPill');
 
   if(loginScreen) loginScreen.style.display = 'none';
   if(erpApp) erpApp.style.display = 'block';
+  document.body.style.zoom = '1';
+  resetMobileZoom();
 
   if(userPill && user){
     userPill.innerHTML = `<i class="bi bi-person-circle"></i> ${user.nombre}`;
