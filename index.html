@@ -1565,9 +1565,9 @@ setTimeout(buildExtraMobileCardsV2,50);
 
 /* ===== LOGIN VISUAL TEMPORAL - SIN APPS SCRIPT ===== */
 const demoUsers = [
-  { usuario:'admin', clave:'Admin1234', nombre:'Administrador', rol:'administrador' },
-  { usuario:'operador', clave:'Operador1234', nombre:'Operador', rol:'operador' },
-  { usuario:'caja', clave:'Caja1234', nombre:'Caja', rol:'caja' }
+  { usuario:'admin', claves:['Admin1234','admin1234'], nombre:'Administrador', rol:'administrador' },
+  { usuario:'operador', claves:['Operador1234','operador1234'], nombre:'Operador', rol:'operador' },
+  { usuario:'caja', claves:['Caja1234','caja1234'], nombre:'Caja', rol:'caja' }
 ];
 
 function showERP(user){
@@ -1599,7 +1599,7 @@ function initLoginDemo(){
     const usuario = document.getElementById('loginUser').value.trim().toLowerCase();
     const clave = document.getElementById('loginPass').value.trim();
     const error = document.getElementById('loginError');
-    const user = demoUsers.find(u => u.usuario === usuario && u.clave === clave);
+    const user = demoUsers.find(u => u.usuario === usuario && u.claves.includes(clave));
 
     if(user){
       sessionStorage.setItem('rectimatic_user', JSON.stringify(user));
